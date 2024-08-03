@@ -20,3 +20,5 @@ const LocalModel = NativeModules.LocalModel
 export function multiply(a: number, b: number): Promise<number> {
   return LocalModel.multiply(a, b);
 }
+
+export default LocalModel;

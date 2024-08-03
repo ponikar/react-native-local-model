@@ -1,14 +1,24 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { multiply } from 'react-native-local-model';
+import L from 'react-native-local-model';
 
 export default function App() {
   const [result, setResult] = useState<number | undefined>();
 
   useEffect(() => {
-    multiply(3, 7).then(setResult);
+    (async () => {
+      try {
+        console.log('WROKING');
+        const load = await L.loadModelAndAskQuestion(
+          'sample_model',
+          'How are you doing?'
+        );
+        console.log('RESPONSE', load);
+      } catch (e) {
+        console.log('ERROR', e);
+      }
+    })();
   }, []);
-
   return (
     <View style={styles.container}>
       <Text>Result: {result}</Text>
