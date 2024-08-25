@@ -30,14 +30,7 @@ void llama_set_rng_seed_impl(struct llama_sampling * smpl, uint32_t seed) {
 }
 
 void llama_sample_softmax_impl(struct llama_sampling * smpl, llama_token_data_array * candidates) {
-    
-    if (candidates == nullptr) {
-           // Handle the error, perhaps by logging or throwing an exception
-           fprintf(stderr, "Error: candidates is null in llama_sample_softmax_impl\n");
-           return;
-    }
-    
-   GGML_ASSERT(candidates->size > 0);
+    GGML_ASSERT(candidates->size > 0);
 
     const int64_t t_start_sample_us = ggml_time_us();
 
@@ -92,14 +85,14 @@ void llama_sample_top_k_impl(struct llama_sampling * smpl, llama_token_data_arra
             constexpr float bucket_low   = -10.0f;
             constexpr float bucket_high  =  10.0f;
             constexpr float bucket_scale = nbuckets/(bucket_high - bucket_low);
-            constexpr float bucker_inter = -bucket_low * bucket_scale;
+            constexpr float bucket_inter = -bucket_low * bucket_scale;
 
             std::vector<int> bucket_idx(candidates->size);
             std::vector<int> histo(nbuckets, 0);
 
             for (int i = 0; i < (int)candidates->size; ++i) {
                 const float val = candidates->data[i].logit;
-                int ib = int(bucket_scale * val + bucker_inter); //nbuckets * (val - bucket_low) / (bucket_high - bucket_low);
+                int ib = int(bucket_scale * val + bucket_inter); //nbuckets * (val - bucket_low) / (bucket_high - bucket_low);
                 ib = std::max(0, std::min(nbuckets-1, ib));
                 bucket_idx[i] = ib;
                 ++histo[ib];
@@ -615,23 +608,10 @@ llama_token llama_sample_token_greedy_impl(struct llama_sampling * smpl, llama_t
 }
 
 llama_token llama_sample_token_with_rng_impl(struct llama_sampling * smpl, llama_token_data_array * candidates, std::mt19937 & rng) {
-    if (smpl == nullptr) {
-        fprintf(stderr, "Error: smpl is null in llama_sample_token_with_rng_impl\n");
-        return 0; // Return a sentinel value or handle this error as appropriate
-    }
-
-    if (candidates == nullptr) {
-        fprintf(stderr, "Error: candidates is null in llama_sample_token_with_rng_impl\n");
-        return 0; // Return a sentinel value or handle this error as appropriate
-    }
-
-    if (candidates->size == 0 || candidates->data == nullptr) {
-        fprintf(stderr, "Error: candidates array is empty or data is null in llama_sample_token_with_rng_impl\n");
-        return 0; // Return a sentinel value or handle this error as appropriate
-    }
+    GGML_ASSERT(smpl);
 
     const int64_t t_start_sample_us = ggml_time_us();
-    llama_sample_softmax_impl(nullptr, candidates);
+    llama_sample_softmax_impl((struct llama_sampling *) nullptr, candidates);
 
     std::vector<float> probs;
     probs.reserve(candidates->size);
